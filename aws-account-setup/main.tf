@@ -19,9 +19,9 @@ resource "aws_iam_user" "admin_console_user" {
 
 resource "aws_iam_user_login_profile" "admin_console_user" {
   user    = aws_iam_user.admin_console_user.name
-  pgp_key = aws_iam_user.admin_console_user.pgp_key
+  pgp_key = var.aws_console_admin_user.pgp_key
 
   lifecycle {
-    ignore_changes = ["password_length", "password_reset_required", "pgp_key"]
+    ignore_changes = [ password_length, password_reset_required, pgp_key ]
   }
 }
