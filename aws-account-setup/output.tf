@@ -1,6 +1,6 @@
 
 output "console_admin_user" {
-  value = aws_iam_user.admin_console_user.user
+  value = aws_iam_user.admin_console_user.name
 }
 
 output "console_admin_password" {
