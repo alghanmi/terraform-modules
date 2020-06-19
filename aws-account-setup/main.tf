@@ -3,12 +3,12 @@ resource "aws_iam_account_alias" "alias" {
 }
 
 resource "aws_iam_account_password_policy" "strict" {
+  allow_users_to_change_password = true
   minimum_password_length        = 32
   require_lowercase_characters   = true
   require_numbers                = true
-  require_uppercase_characters   = true
   require_symbols                = true
-  allow_users_to_change_password = true
+  require_uppercase_characters   = true
 }
 
 resource "aws_iam_user" "admin_console_user" {
@@ -18,10 +18,16 @@ resource "aws_iam_user" "admin_console_user" {
 }
 
 resource "aws_iam_user_login_profile" "admin_console_user" {
-  user    = aws_iam_user.admin_console_user.name
-  pgp_key = var.aws_console_admin_user.pgp_key
+  user            = aws_iam_user.admin_console_user.name
+  pgp_key         = var.aws_console_admin_user.pgp_key
+  password_length = aws_iam_account_password_policy.strict.minimum_password_length
 
   lifecycle {
-    ignore_changes = [ password_length, password_reset_required, pgp_key ]
+    ignore_changes = [password_length, password_reset_required, pgp_key]
   }
+}
+
+resource "aws_iam_user_policy_attachment" "admin_console_user" {
+  user       = aws_iam_user.admin_console_user.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
