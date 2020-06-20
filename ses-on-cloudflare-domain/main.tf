@@ -39,7 +39,7 @@ resource "cloudflare_record" "default_spf" {
   name    = aws_ses_domain_identity.default.domain
   type    = "TXT"
   value   = var.spf_record
-  ttl     = "600"
+  ttl     = "3600"
 }
 
 ## MX Record
@@ -48,7 +48,7 @@ resource "cloudflare_record" "default_mx" {
   name     = aws_ses_domain_identity.default.domain
   type     = "MX"
   value    = "inbound-smtp.${var.ses_region}.amazonaws.com"
-  ttl      = "600"
+  ttl      = "3600"
   priority = 10
 }
 
