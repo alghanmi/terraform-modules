@@ -33,7 +33,7 @@ resource "cloudflare_record" "default_dkim" {
   value   = "${aws_ses_domain_dkim.default.dkim_tokens[count.index]}.dkim.amazonses.com"
 }
 
-## SPF Records
+## SPF Record
 resource "cloudflare_record" "default_spf" {
   zone_id = var.domain_zone_id
   name    = aws_ses_domain_identity.default.domain
@@ -49,5 +49,30 @@ resource "cloudflare_record" "default_mx" {
   type     = "MX"
   value    = "inbound-smtp.${var.ses_region}.amazonaws.com"
   ttl      = "600"
+  priority = 10
+}
+
+## SES Mail From Domain
+resource "aws_ses_domain_mail_from" "mailfrom" {
+  domain           = aws_ses_domain_identity.default.domain
+  mail_from_domain = format("%s.%s", var.mailfrom_subdomain, aws_ses_domain_identity.default.domain)
+}
+
+## Mail From SPF Record
+resource "cloudflare_record" "mailfrom_spf" {
+  zone_id = var.domain_zone_id
+  name    = aws_ses_domain_mail_from.mailfrom.mail_from_domain
+  type    = "TXT"
+  value   = var.spf_record
+  ttl     = "3600"
+}
+
+## Mail From MX Record
+resource "cloudflare_record" "mailfrom_mx" {
+  zone_id  = var.domain_zone_id
+  name     = aws_ses_domain_mail_from.mailfrom.mail_from_domain
+  type     = "MX"
+  value    = "feedback-smtp.${var.ses_region}.amazonses.com"
+  ttl      = "3600"
   priority = 10
 }
