@@ -42,6 +42,15 @@ resource "cloudflare_record" "default_spf" {
   ttl     = "3600"
 }
 
+## DMARC Record
+resource "cloudflare_record" "default_dmarc" {
+  zone_id = var.domain_zone_id
+  name    = format("_dmarc.%s", aws_ses_domain_identity.default.domain)
+  type    = "TXT"
+  value   = format("v=DMARC1; p=reject; pct=100; rua=mailto:%s@%s", "dmarc-reports", aws_ses_domain_identity.default.domain)
+  ttl     = "600"
+}
+
 ## MX Record
 resource "cloudflare_record" "default_mx" {
   zone_id  = var.domain_zone_id
