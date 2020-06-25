@@ -22,7 +22,25 @@ variable "ses_region" {
 variable "spf_record" {
   type        = string
   description = "Sender Policy Framework (SPF) for SES. https://docs.aws.amazon.com/ses/latest/DeveloperGuide/send-email-authentication-spf.html"
-  default     = "v=spf1 include:amazonses.com -all"
+  default     = "v=spf1 include:amazonses.com ~all"
+}
+
+variable "dmarc_record" {
+  type = object({
+    policy                  = string
+    percentage              = number
+    reporting_uri           = list(string) # emails must be prefixed with `mailto:`
+    forensic_uri            = list(string) # emails must be prefixed with `mailto:`
+    failure_reports_options = string
+  })
+
+  default = {
+    policy                  = "reject"
+    percentage              = 100
+    reporting_uri           = []
+    forensic_uri            = []
+    failure_reports_options = 1
+  }
 }
 
 variable "tags" {
