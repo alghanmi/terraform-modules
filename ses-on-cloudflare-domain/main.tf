@@ -5,7 +5,7 @@ resource "aws_ses_domain_identity" "default" {
 
 resource "cloudflare_record" "ses_verification" {
   zone_id = var.domain_zone_id
-  name    = "_amazonses.${aws_ses_domain_identity.default.domain}"
+  name    = format("_amazonses.%s", aws_ses_domain_identity.default.domain)
   type    = "TXT"
   ttl     = "3600"
   value   = aws_ses_domain_identity.default.verification_token
@@ -27,10 +27,10 @@ resource "aws_ses_domain_dkim" "default" {
 resource "cloudflare_record" "default_dkim" {
   count   = length(aws_ses_domain_dkim.default.dkim_tokens)
   zone_id = var.domain_zone_id
-  name    = "${aws_ses_domain_dkim.default.dkim_tokens[count.index]}._domainkey.${aws_ses_domain_dkim.default.domain}"
+  name    = format("%s._domainkey.%s", aws_ses_domain_dkim.default.dkim_tokens[count.index], aws_ses_domain_dkim.default.domain)
   type    = "CNAME"
   ttl     = "3600"
-  value   = "${aws_ses_domain_dkim.default.dkim_tokens[count.index]}.dkim.amazonses.com"
+  value   = format("%s.dkim.amazonses.com", aws_ses_domain_dkim.default.dkim_tokens[count.index])
 }
 
 ## SPF Record
@@ -47,8 +47,13 @@ resource "cloudflare_record" "default_dmarc" {
   zone_id = var.domain_zone_id
   name    = format("_dmarc.%s", aws_ses_domain_identity.default.domain)
   type    = "TXT"
-  value   = format("v=DMARC1; p=%s; pct=%s; rua=%s; ruf=%s; fo=%s", var.dmarc_record.policy, var.dmarc_record.percentage, join(",", var.dmarc_record.reporting_uri), join(",", var.dmarc_record.forensic_uri), var.dmarc_record.failure_reports_options)
-  ttl     = "600"
+  value = format("v=DMARC1; p=%s; pct=%s; rua=%s; ruf=%s; fo=%s",
+    var.dmarc_record.policy,
+    var.dmarc_record.percentage,
+    join(",", var.dmarc_record.reporting_uri),
+    join(",", var.dmarc_record.forensic_uri),
+  var.dmarc_record.failure_reports_options)
+  ttl = "3600"
 }
 
 ## MX Record
@@ -56,7 +61,7 @@ resource "cloudflare_record" "default_mx" {
   zone_id  = var.domain_zone_id
   name     = aws_ses_domain_identity.default.domain
   type     = "MX"
-  value    = "inbound-smtp.${var.ses_region}.amazonaws.com"
+  value    = format("inbound-smtp.%s.amazonaws.com", var.ses_region)
   ttl      = "3600"
   priority = 10
 }
@@ -81,7 +86,7 @@ resource "cloudflare_record" "mailfrom_mx" {
   zone_id  = var.domain_zone_id
   name     = aws_ses_domain_mail_from.mailfrom.mail_from_domain
   type     = "MX"
-  value    = "feedback-smtp.${var.ses_region}.amazonses.com"
+  value    = format("feedback-smtp.%s.amazonses.com", var.ses_region)
   ttl      = "3600"
   priority = 10
 }
