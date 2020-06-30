@@ -43,6 +43,17 @@ variable "dmarc_record" {
   }
 }
 
+variable "forwarder_mapping" {
+  type        = map(list(string))
+  description = "Object where the key is the lowercase email address from which to forward and the value is an array of email addresses to which to send the message."
+  default = {
+    "info@example.com" : ["example.john@example.com", "example.jen@example.com"],
+    "abuse@example.com" : ["example.jim@example.com"],
+    "@example.com" : ["example.john@example.com"],
+    "info" : ["info@example.com"]
+  }
+}
+
 variable "tags" {
   type = map
   default = {
