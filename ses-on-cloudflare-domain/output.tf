@@ -42,7 +42,7 @@ output "dns_records" {
 
 output "mailfrom_dns_records" {
   value = {
-    spf   = cloudflare_record.mailfrom_spf.name
-    mx    = cloudflare_record.mailfrom_mx.name
+    spf = cloudflare_record.mailfrom_spf.name
+    mx  = cloudflare_record.mailfrom_mx.name
   }
 }
