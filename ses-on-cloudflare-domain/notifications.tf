@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "bounce" {
-  name = format("%s-ses-bounce", replace(aws_ses_domain_identity.default.domain, ".", "-"))
+  name = format("%s-ses-bounce", local.normalized_domain_name)
   tags = var.tags
 }
 
@@ -11,7 +11,7 @@ resource "aws_ses_identity_notification_topic" "bounce" {
 }
 
 resource "aws_sns_topic" "complaint" {
-  name = format("%s-ses-complaint", replace(aws_ses_domain_identity.default.domain, ".", "-"))
+  name = format("%s-ses-complaint", local.normalized_domain_name)
   tags = var.tags
 }
 
