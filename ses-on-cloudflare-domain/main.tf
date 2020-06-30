@@ -25,7 +25,7 @@ resource "aws_ses_domain_dkim" "default" {
 }
 
 resource "cloudflare_record" "default_dkim" {
-  count   = length(aws_ses_domain_dkim.default.dkim_tokens)
+  count   = 3 # can't use `length(aws_ses_domain_dkim.default.dkim_tokens)` due to tf dependency
   zone_id = var.domain_zone_id
   name    = format("%s._domainkey.%s", aws_ses_domain_dkim.default.dkim_tokens[count.index], aws_ses_domain_dkim.default.domain)
   type    = "CNAME"
