@@ -43,6 +43,25 @@ variable "dmarc_record" {
   }
 }
 
+variable "lambda_function_specs" {
+  type = object({
+    bucket   = string
+    key      = string
+    hash_key = string
+    runtime  = string
+    handler  = string
+
+  })
+  description = "Specifications for the SES lamba function"
+  default = {
+    bucket   = "lambda-source-code"
+    key      = "aws-lambda-ses-forwarder.zip"
+    hash_key = "aws-lambda-ses-forwarder.zip.sha256base64"
+    runtime  = "nodejs12.x"
+    handler  = "index.handler"
+  }
+}
+
 variable "forwarder_mapping" {
   type        = map(list(string))
   description = "Object where the key is the lowercase email address from which to forward and the value is an array of email addresses to which to send the message."

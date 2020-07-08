@@ -64,19 +64,16 @@ resource "aws_iam_role_policy_attachment" "lambda" {
   policy_arn = aws_iam_policy.lambda.arn
 }
 
-data "archive_file" "forwarder" {
-  type        = "zip"
-  source_dir  = "${path.module}/scripts/aws-lambda-ses-forwarder"
-  output_path = "${path.module}/scripts/aws-lambda-ses-forwarder.zip"
-}
-
 resource "aws_lambda_function" "forwarder" {
-  filename         = data.archive_file.forwarder.output_path
-  function_name    = format("%s-aws-lambda-ses-forwarder", local.normalized_domain_name)
-  role             = aws_iam_role.lambda.arn
-  source_code_hash = data.archive_file.forwarder.output_base64sha256
-  runtime          = "nodejs12.x"
-  handler          = "index.handler"
+  function_name     = format("%s-aws-lambda-ses-forwarder", local.normalized_domain_name)
+  s3_bucket         = data.aws_s3_bucket_object.forwarder_lambda_source_code.bucket
+  s3_key            = data.aws_s3_bucket_object.forwarder_lambda_source_code.key
+  s3_object_version = data.aws_s3_bucket_object.forwarder_lambda_source_code.version_id
+  #source_code_hash = data.aws_s3_bucket_object.forwarder_lambda_source_code_hash.body # Not using due to https://github.com/terraform-providers/terraform-provider-aws/issues/7385
+
+  role    = aws_iam_role.lambda.arn
+  runtime = var.lambda_function_specs.runtime
+  handler = var.lambda_function_specs.handler
   environment {
     variables = {
       "EMAIL_BUCKET_NAME"     = aws_s3_bucket.mail.bucket
@@ -86,6 +83,7 @@ resource "aws_lambda_function" "forwarder" {
       "EMAIL_MAPPING"         = jsonencode(var.forwarder_mapping)
     }
   }
+
   tags = var.tags
 }
 
