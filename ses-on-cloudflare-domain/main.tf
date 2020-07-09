@@ -47,12 +47,14 @@ resource "cloudflare_record" "default_dmarc" {
   zone_id = var.domain_zone_id
   name    = format("_dmarc.%s", aws_ses_domain_identity.default.domain)
   type    = "TXT"
-  value = format("v=DMARC1; p=%s; pct=%s; rua=%s; ruf=%s; fo=%s",
-    var.dmarc_record.policy,
-    var.dmarc_record.percentage,
-    join(",", var.dmarc_record.reporting_uri),
-    join(",", var.dmarc_record.forensic_uri),
-  var.dmarc_record.failure_reports_options)
+  value = join("; ", compact([
+    "v=DMARC1",
+    format("p=%s", var.dmarc_record.policy),
+    format("pct=%s", var.dmarc_record.percentage),
+    local.dmarc_rua,
+    local.dmarc_ruf,
+    local.dmarc_fo
+  ]))
   ttl = "3600"
 }
 
