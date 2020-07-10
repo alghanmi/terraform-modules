@@ -43,6 +43,11 @@ variable "dmarc_record" {
   }
 }
 
+variable "ses_receipt_rule_set" {
+  type    = string
+  default = ""
+}
+
 variable "lambda_function_specs" {
   type = object({
     bucket   = string

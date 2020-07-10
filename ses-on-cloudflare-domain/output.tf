@@ -20,7 +20,7 @@ output "ses_verification_dns_record" {
 output "ses_receipt" {
   value = {
     rule     = aws_ses_receipt_rule.receive_all.name
-    rule_set = aws_ses_receipt_rule_set.receive_all.rule_set_name
+    rule_set = aws_ses_receipt_rule.receive_all.rule_set_name
   }
 }
 
