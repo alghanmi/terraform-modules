@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "mail" {
-  bucket = format("mail-%s-%s-%s", local.normalized_domain_name, var.ses_region, var.domain_zone_id)
+  bucket = format("mail-%s-%s-%s", local.normalized_domain_name, var.ses_region, substr(var.domain_zone_id, 0, 5))
   acl    = "private"
 
   server_side_encryption_configuration {
