@@ -1,10 +1,6 @@
 resource "aws_s3_bucket" "site" {
   bucket = var.site_fqdn
-  acl    = "public-read"
-  policy = templatefile("${path.module}/bucket-public-read-policy.json.tmpl", {
-    s3_bucket         = var.site_fqdn,
-    src_ip_allow_list = jsonencode(local.src_ip_allow_list)
-  })
+  acl    = "private"
 
   server_side_encryption_configuration {
     rule {
@@ -14,28 +10,29 @@ resource "aws_s3_bucket" "site" {
     }
   }
 
-  dynamic "website" {
-    for_each = local.website_block[var.redirect_to == "" ? "static_site" : "redirect_site"]
-    content {
-      index_document           = lookup(website.value, "index_document", null)
-      error_document           = lookup(website.value, "error_document", null)
-      redirect_all_requests_to = lookup(website.value, "redirect_all_requests_to", null)
-      routing_rules            = lookup(website.value, "routing_rules", null)
-    }
+  website {
+    index_document = var.index_document
+    error_document = var.error_document
+    routing_rules  = var.routing_rules
   }
 
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "PUT", "POST"]
-    allowed_origins = [format("https://%s", var.site_fqdn), format("http://%s", var.site_fqdn)]
+    allowed_origins = ["*"]
     expose_headers  = ["ETag"]
-    max_age_seconds = 300
+    max_age_seconds = 3600
   }
 
   logging {
-    target_bucket = var.logs_bucket
+    target_bucket = data.aws_s3_bucket.logs.bucket
     target_prefix = format("site-logs-%s/", replace(var.site_fqdn, ".", "-"))
   }
 
   tags = var.tags
+}
+
+resource "aws_s3_bucket_policy" "site_s3_cloudfront_policy" {
+  bucket = aws_s3_bucket.site.id
+  policy = data.aws_iam_policy_document.allow_s3_from_cloudfront.json
 }
