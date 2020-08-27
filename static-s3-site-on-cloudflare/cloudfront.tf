@@ -110,8 +110,4 @@ resource "aws_cloudfront_distribution" "site" {
   }
 
   tags = var.tags
-
-  depends_on = [
-    aws_acm_certificate.cert
-  ]
 }
