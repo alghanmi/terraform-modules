@@ -4,7 +4,7 @@ resource "aws_sns_topic" "account_alerts" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "account_bill_alarm" {
-  alarm_name          = "bill-alarm-${lower(var.alarm_bill.currency)}-${aws_iam_account_alias.alias.account_alias}"
+  alarm_name          = format("bill-alarm-%s-%s", lower(var.alarm_bill.currency), aws_iam_account_alias.alias.account_alias)
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
   metric_name         = "EstimatedCharges"
@@ -16,7 +16,7 @@ resource "aws_cloudwatch_metric_alarm" "account_bill_alarm" {
   alarm_description   = var.alarm_bill.description
 
   dimensions = {
-    Currency = "${upper(var.alarm_bill.currency)}"
+    Currency = format("%s", upper(var.alarm_bill.currency))
   }
 }
 
