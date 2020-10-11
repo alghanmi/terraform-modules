@@ -19,11 +19,17 @@ resource "cloudflare_record" "aliases" {
 }
 
 resource "cloudflare_record" "certificate_validation" {
-  count = length(local.domain_list)
+  for_each = {
+    for validation_option in aws_acm_certificate.cert.domain_validation_options : validation_option.domain_name => {
+      record_name  = validation_option.resource_record_name
+      record_type  = validation_option.resource_record_type
+      record_value = validation_option.resource_record_value
+    }
+  }
 
   zone_id = var.cloudflare_domain.id
-  name    = format("%s", aws_acm_certificate.cert.domain_validation_options[count.index].resource_record_name)
-  type    = aws_acm_certificate.cert.domain_validation_options[count.index].resource_record_type
-  value   = trimsuffix(aws_acm_certificate.cert.domain_validation_options[count.index].resource_record_value, ".")
+  name    = format("%s", each.value.record_name)
+  type    = each.value.record_type
+  value   = trimsuffix(each.value.record_value, ".")
   ttl     = 1
 }
