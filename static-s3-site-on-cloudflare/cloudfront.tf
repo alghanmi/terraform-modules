@@ -103,11 +103,5 @@ resource "aws_cloudfront_distribution" "site" {
     minimum_protocol_version = "TLSv1.2_2019"
   }
 
-  logging_config {
-    bucket          = data.aws_s3_bucket.logs.bucket_domain_name
-    prefix          = format("cloudfront-logs-%s/", replace(var.site_fqdn, ".", "-"))
-    include_cookies = false
-  }
-
   tags = var.tags
 }
