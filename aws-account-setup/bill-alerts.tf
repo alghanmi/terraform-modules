@@ -1,6 +1,26 @@
+data "aws_iam_policy_document" "sns_allow_aws_budget" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["budgets.amazonaws.com"]
+    }
+
+    actions = ["SNS:Publish"]
+
+    resources = [aws_sns_topic.account_alerts.arn]
+  }
+}
+
 resource "aws_sns_topic" "account_alerts" {
   name = var.sns_topic_account_alerts
   tags = var.tags
+}
+
+resource "aws_sns_topic_policy" "account_alerts_sns_policy" {
+  arn    = aws_sns_topic.account_alerts.arn
+  policy = data.aws_iam_policy_document.sns_allow_aws_budget.json
 }
 
 resource "aws_cloudwatch_metric_alarm" "account_bill_alarm" {
@@ -12,7 +32,7 @@ resource "aws_cloudwatch_metric_alarm" "account_bill_alarm" {
   period              = "21600"
   statistic           = "Maximum"
   threshold           = var.alarm_bill.monthly_threshold
-  alarm_actions       = [ aws_sns_topic.account_alerts.arn ]
+  alarm_actions       = [aws_sns_topic.account_alerts.arn]
   alarm_description   = var.alarm_bill.description
 
   dimensions = {
